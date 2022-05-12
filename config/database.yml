@@ -1,0 +1,15 @@
+production:
+  url: <%= ENV['DATABASE_URL'] %>
+  pool: <%= ENV['DB_POOL'] || ENV['PUMA_MAX_THREADS'] || 16 %>
+
+development:
+  adapter: postgresql
+  database: monet
+  host: <%= ENV.fetch('PGHOST', 'localhost') %>
+  username: <%= ENV['PGUSER'] %>
+
+test:
+  adapter: postgresql
+  host: <%= ENV.fetch('PGHOST', 'localhost') %>
+  database: monet_test
+  username: <%= ENV['PGUSER'] %>
