@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_05_11_122001) do
+ActiveRecord::Schema[7.0].define(version: 2022_05_20_004620) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,7 +30,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_11_122001) do
     t.bigint "month_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "periodic_entry_id"
     t.index ["month_id"], name: "index_entries_on_month_id"
+    t.index ["periodic_entry_id"], name: "index_entries_on_periodic_entry_id"
   end
 
   create_table "months", force: :cascade do |t|
@@ -44,6 +46,18 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_11_122001) do
     t.index ["year_id"], name: "index_months_on_year_id"
   end
 
+  create_table "periodic_entries", force: :cascade do |t|
+    t.json "entry_data", null: false
+    t.bigint "start_month_id", null: false
+    t.bigint "end_month_id"
+    t.integer "interval"
+    t.boolean "fulfilled", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["end_month_id"], name: "index_periodic_entries_on_end_month_id"
+    t.index ["start_month_id"], name: "index_periodic_entries_on_start_month_id"
+  end
+
   create_table "years", force: :cascade do |t|
     t.integer "name"
     t.float "interest_rate"
@@ -52,4 +66,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_11_122001) do
     t.index ["name"], name: "index_years_on_name", unique: true
   end
 
+  add_foreign_key "periodic_entries", "months", column: "end_month_id"
+  add_foreign_key "periodic_entries", "months", column: "start_month_id"
 end

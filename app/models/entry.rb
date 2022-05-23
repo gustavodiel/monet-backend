@@ -8,22 +8,19 @@ class Entry < ApplicationRecord
   after_create :invalidate_month_total
 
   belongs_to :month
+  belongs_to :periodic_entry, optional: true
 
   def invalidate_month_total
     month.invalidate!
   end
 
   def apply_installments
-    current_month = month.next_month
-    (installment_total - 1).times.each do |installment|
-      puts "Creating installment #{installment}"
-      puts "Month: #{current_month.name} #{current_month.year.name}"
-
-      current_month.entries << Entry.new(self.attributes.excluding('id', 'month_id').merge(installment_number: installment + 2, installment_total:))
-
-      current_month.save!
-      current_month = current_month.next_month
-    end
+    month
+      .next_month
+      .next(installment_total - 2)
+      .each_with_index
+      .map { |month, index| attributes.excluding('id').merge(month_id: month.id, installment_number: index + 2, installment_total:) }
+      .then { |data| Entry.insert_all(data) }
   end
 
   def sum_value

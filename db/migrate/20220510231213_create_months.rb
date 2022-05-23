@@ -4,8 +4,6 @@ class CreateMonths < ActiveRecord::Migration[7.0]
       t.integer :name
       t.monetize :total, amount: { null: true, default: nil }
       t.belongs_to :year
-
-      t.timestamps
     end
 
     add_index :months, [:year_id, :name], unique: true

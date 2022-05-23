@@ -13,6 +13,8 @@ class CreateEntries < ActiveRecord::Migration[7.0]
       t.datetime :paid_at
       t.integer :day_of_month_to_pay
 
+      t.belongs_to :entry
+
       t.belongs_to :month
 
       t.timestamps

@@ -15,4 +15,5 @@ Rails.application.routes.draw do
   get :entries, to: 'entries#index'
   get 'entries/:id', to: 'entries#show'
   post :entries, to: 'entries#create'
+  post :entries_monthly, to: 'entries#create_monthly'
 end

@@ -12,7 +12,9 @@ class Year < ApplicationRecord
   end
 
   def self.at!(name)
-    Year.find_or_create_by(name: name)
+    Year.find_by!(name: name)
+  rescue ActiveRecord::RecordNotFound
+    Year.create(name: name, interest_rate: 12.75)
   end
 
   def create_months
@@ -34,6 +36,14 @@ class Year < ApplicationRecord
   end
 
   def next_year
+    Year.at(name + 1)
+  end
+
+  def last_year!
+    Year.at!(name - 1)
+  end
+
+  def next_year!
     Year.at!(name + 1)
   end
 

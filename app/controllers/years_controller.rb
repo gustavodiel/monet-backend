@@ -2,17 +2,11 @@ class YearsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def index
-    respond_to do |format|
-      format.json do
-        render json: Year.all
-      end
-    end
+    render json: Year.all
   end
 
   def show
-    respond_to do |format|
-      format.json { render json: Year.find(params[:id]) }
-    end
+    render json: Year.find_by(name: params[:id]) || Year.find(params[:id])
   end
 
   def create
