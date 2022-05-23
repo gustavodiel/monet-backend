@@ -20,7 +20,8 @@ class Month < ApplicationRecord
 
   enum name: NAMES
 
-  after_create :check_periodics
+  before_create :check_periodics
+  before_create :calculate
 
   monetize :total_cents, allow_nil: true
 
@@ -47,7 +48,7 @@ class Month < ApplicationRecord
               FROM months e
               JOIN years ye on e.year_id = ye.id
               INNER JOIN month_range s ON month_index(e.name, ye.name) = month_index(s.name, s.year_name) + 1 AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year})
-      ) SELECT id, name, total_cents, total_currency, year_id, created_at, updated_at FROM month_range ORDER BY year_name, name;
+      ) SELECT id, name, total_cents, total_currency, year_id FROM month_range ORDER BY year_name, name;
     SQL
     )
   end
@@ -67,7 +68,7 @@ class Month < ApplicationRecord
               FROM months e
               JOIN years ye on e.year_id = ye.id
               INNER JOIN month_range s ON month_index(e.name, ye.name) = month_index(s.name, s.year_name) + 1 AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year}) + #{number}
-      ) SELECT id, name, total_cents, total_currency, year_id, created_at, updated_at FROM month_range ORDER BY year_name, name;
+      ) SELECT id, name, total_cents, total_currency, year_id FROM month_range ORDER BY year_name, name;
     SQL
     )
   end
@@ -91,7 +92,7 @@ class Month < ApplicationRecord
     return total if total.present?
 
     (entries_total + last_month_value).tap do |result|
-      self.value = result
+      self.total = result
       self.save!
     end
   end
@@ -111,7 +112,7 @@ class Month < ApplicationRecord
   def last_month_value
     return 0 if last_month.nil?
 
-    last_month.calculate * (1.0 + year.interest_rate / 12000)
+    last_month.calculate * (1.0 + (year.interest_rate || 0) / 12000)
   end
 
   def last_month
@@ -140,13 +141,11 @@ class Month < ApplicationRecord
 
   def check_periodics
     periodics = PeriodicEntry.unfinished
-    news = periodics.map do |periodic|
+    periodics.map do |periodic|
       if periodic.on_month?(self)
         periodic.build_for_month(self).attributes.except('id', 'created_at', 'updated_at')
       end
     end
-
-    Entry.insert_all(news.uniq)
   end
 
   def <=>(other)

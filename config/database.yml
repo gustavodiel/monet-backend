@@ -4,12 +4,7 @@ production:
 
 development:
   adapter: postgresql
-  database: monet
-  host: <%= ENV.fetch('PGHOST', 'localhost') %>
-  username: <%= ENV['PGUSER'] %>
-
-test:
-  adapter: postgresql
-  host: <%= ENV.fetch('PGHOST', 'localhost') %>
-  database: monet_test
-  username: <%= ENV['PGUSER'] %>
+  database: <%= ENV.fetch('DATABASE_NAME', 'monet') %>
+  host: <%= ENV.fetch('DATABASE_HOST', '172.20.0.2') %>
+  username: <%= ENV['POSTGRES_USER'] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>

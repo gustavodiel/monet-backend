@@ -27,10 +27,12 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_20_004620) do
     t.integer "installment_total"
     t.datetime "paid_at"
     t.integer "day_of_month_to_pay"
+    t.bigint "entry_id"
     t.bigint "month_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "periodic_entry_id"
+    t.index ["entry_id"], name: "index_entries_on_entry_id"
     t.index ["month_id"], name: "index_entries_on_month_id"
     t.index ["periodic_entry_id"], name: "index_entries_on_periodic_entry_id"
   end
@@ -40,8 +42,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_20_004620) do
     t.integer "total_cents"
     t.string "total_currency", default: "BRL", null: false
     t.bigint "year_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["year_id", "name"], name: "index_months_on_year_id_and_name", unique: true
     t.index ["year_id"], name: "index_months_on_year_id"
   end
@@ -61,8 +61,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_20_004620) do
   create_table "years", force: :cascade do |t|
     t.integer "name"
     t.float "interest_rate"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["name"], name: "index_years_on_name", unique: true
   end
 

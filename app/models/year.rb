@@ -24,7 +24,7 @@ class Year < ApplicationRecord
   end
 
   def months_after(month)
-    months.where('months.name > ?', month.name_before_type_cast)
+    months.where('months.name > ?', month.name_before_type_cast).order(:name)
   end
 
   def current_month
