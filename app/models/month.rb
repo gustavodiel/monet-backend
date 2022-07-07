@@ -21,13 +21,13 @@ class Month < ApplicationRecord
   enum name: NAMES
 
   before_create :check_periodics
-  before_create :calculate
+  after_create :calculate
 
   monetize :total_cents, allow_nil: true
 
   has_many :entries, dependent: :destroy
-  has_many :periodic_entries, foreign_key: :start_month_id, inverse_of: :start_month, dependent: :destroy
-  has_many :periodic_entries, foreign_key: :end_month_id, inverse_of: :end_month, dependent: :nullify
+  has_many :start_periodic_entries, class_name: 'PeriodicEntry', foreign_key: :start_month_id, inverse_of: :start_month, dependent: :destroy
+  has_many :end_periodic_entries, class_name: 'PeriodicEntry', foreign_key: :end_month_id, inverse_of: :end_month, dependent: :nullify
 
   belongs_to :year
 

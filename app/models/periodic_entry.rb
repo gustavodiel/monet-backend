@@ -7,7 +7,7 @@ class PeriodicEntry < ApplicationRecord
 
   has_many :entries, dependent: :nullify
 
-  belongs_to :start_month, class_name: 'Month', dependent: :destroy
+  belongs_to :start_month, class_name: 'Month'
   belongs_to :end_month, class_name: 'Month', optional: true
 
   def update_months

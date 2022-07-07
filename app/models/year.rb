@@ -51,6 +51,12 @@ class Year < ApplicationRecord
     super.merge(months: months.as_json)
   end
 
+  def <=>(other)
+    name <=> other.name
+  end
+
+  alias_method :succ, :next_year
+
   Month::NAMES.each do |month_name, value|
     define_method(month_name) do
       months.find_by(name: value)
