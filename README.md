@@ -6,6 +6,7 @@ Being a PoC:
 2. It has no Rails basic configuration (no CORS, no SSL, no CSRF, etc)
 3. It has no tests :eyes:
 4. The commits are a total mess :sweat_smile:
+5. It has not yer been tested on real life.
 
 ## Cool things about it
 
@@ -13,6 +14,7 @@ The idea of this PoC is to figure out a way of a possible production-ready finan
 1. Can store all your transactions (income and expenses)
    1. Works almost like an event-sourcing system, where you can see the history of your transactions.
 2. Does not take a kajillion years to load the data
+   1. It does however takes some space due to cache, but it's minimal
 
 ## How it works
 While not production-ready as the goal, it does some cool stuff with how it stores the transactions:
