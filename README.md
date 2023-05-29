@@ -24,7 +24,7 @@ While not production-ready as the goal, it does some cool stuff with how it stor
   - Periodic entries are the transactions that happen every month or year (like rent, internet, netflix, etc)
 - Periodic entries have many entries, one for each month or year that it happens.
   - Periodic entries also have the starting month and ending month
-- Every month has a cache in the `total` column which is the sum of all entries for that month and the months before it
+- [Month](./app/models/month.rb) is the most important entity in this architecture, as it has a cache in the `total` column which is the sum of all entries for that month and the months before it
   - Whenever something changes, the cache is updated for the month that the change happened and all the months after it
   - This way, when you want to see the total for a month, you don't have to calculate it, it's already there
 
