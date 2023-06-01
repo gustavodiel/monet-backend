@@ -16,15 +16,14 @@ class Entry < ApplicationRecord
 
   def apply_installments
     month
-      .next_month
-      .next(installment_total - 2)
+      .next(installment_total - 1)
       .each_with_index
       .map { |month, index| attributes.excluding('id').merge(month_id: month.id, installment_number: index + 2, installment_total:) }
       .then { |data| Entry.insert_all(data) }
   end
 
   def sum_value
-    return value if income?
-    -value
+    return value.cents if income?
+    -value.cents
   end
 end

@@ -3,17 +3,17 @@ class PeriodicEntry < ApplicationRecord
 
   enum interval: { monthly: 1, yearly: 2 }
 
-  after_create :update_months
+  after_create :generate_entries_async
 
   has_many :entries, dependent: :nullify
 
   belongs_to :start_month, class_name: 'Month'
   belongs_to :end_month, class_name: 'Month', optional: true
 
-  def update_months
-    return update_yearly if yearly?
+  def generate_entries
+    return generate_yearly_entries if yearly?
 
-    update_monthly
+    generate_monthly_entries
   end
 
   def on_month?(month)
@@ -37,12 +37,17 @@ class PeriodicEntry < ApplicationRecord
 
   private
 
-  def update_yearly
+  def generate_entries_async
+    PeriodicEntriesPropagationJob.perform_async(id)
+  end
+
+  def generate_yearly_entries
     month = start_month
     loop do
       build_for_month(month).save!
 
       break if end_month && month == end_month
+      break if month.next_year.nil?
 
       month = month.next_year.public_send(month.name)
 
@@ -50,9 +55,9 @@ class PeriodicEntry < ApplicationRecord
     end
   end
 
-  def update_monthly
+  def generate_monthly_entries
     start_month
-      .through(end_month)
+      .through(end_month, inclusive: true)
       .map { |month| entry_data.merge(periodic_entry_id: id, month_id: month.id) }
       .then { |data| Entry.insert_all(data) }
   end

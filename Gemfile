@@ -31,6 +31,8 @@ gem 'rack-cors'
 
 gem 'money-rails', '~>1.12'
 
+gem 'sidekiq'
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
@@ -40,16 +42,22 @@ gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+group :test do
+  gem 'rspec'
+  gem 'rspec-rails'
+  gem 'database_cleaner-active_record'
+end
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
   gem 'pry'
   gem 'pry-nav'
   gem 'dotenv-rails'
+  gem 'factory_bot_rails'
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 end
-

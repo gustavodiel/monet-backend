@@ -33,42 +33,32 @@ class Month < ApplicationRecord
 
   delegate :last_year, :next_year, :last_year!, :next_year!, to: :year
 
-  def self.through(starting_month, ending_month)
-    end_month = ending_month.try(:name_before_type_cast) || 12
-    end_year = ending_month.try { year.name } || 2100
+  def self.through(starting_month, ending_month, inclusive: false)
+    gt = inclusive ? '>=' : '>'
+    lt = inclusive ? '<=' : '<'
 
     Month.find_by_sql(<<-SQL.squish
-      WITH RECURSIVE month_range AS (
-          SELECT months.*, y.name as year_name
-          FROM months
-          JOIN years y on months.year_id = y.id
-          WHERE months.id = #{starting_month.id}
-          UNION
-              SELECT e.*, ye.name as year_name
-              FROM months e
-              JOIN years ye on e.year_id = ye.id
-              INNER JOIN month_range s ON month_index(e.name, ye.name) = month_index(s.name, s.year_name) + 1 AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year})
-      ) SELECT id, name, total_cents, total_currency, year_id FROM month_range ORDER BY year_name, name;
+      SELECT  e.*
+        FROM months e
+        JOIN years ye ON e.year_id = ye.id
+        WHERE month_index(e.name, ye.name) #{gt} month_index(#{starting_month.numeric_month}, #{starting_month.year.name})
+          AND month_index(e.name, ye.name) #{lt} month_index(#{ending_month.numeric_month}, #{ending_month.year.name})
+        ORDER BY ye.name, name;
     SQL
     )
   end
 
   def self.next(starting_month, number)
-    end_month = starting_month.name_before_type_cast
-    end_year = starting_month.year.name
+    return [] unless (end_month = starting_month.numeric_month)
+    return [] unless (end_year = starting_month.year.name)
 
     Month.find_by_sql(<<-SQL.squish
-      WITH RECURSIVE month_range AS (
-          SELECT months.*, y.name as year_name
-          FROM months
-          JOIN years y on months.year_id = y.id
-          WHERE months.id = #{starting_month.id}
-          UNION
-              SELECT e.*, ye.name as year_name
-              FROM months e
-              JOIN years ye on e.year_id = ye.id
-              INNER JOIN month_range s ON month_index(e.name, ye.name) = month_index(s.name, s.year_name) + 1 AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year}) + #{number}
-      ) SELECT id, name, total_cents, total_currency, year_id FROM month_range ORDER BY year_name, name;
+      SELECT  e.*
+      FROM months e
+      JOIN years ye ON e.year_id = ye.id
+      WHERE month_index(e.name, ye.name) > month_index(#{end_month}, #{end_year})
+        AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year}) + #{number}
+      ORDER BY ye.name, name;
     SQL
     )
   end
@@ -91,14 +81,13 @@ class Month < ApplicationRecord
   def calculate
     return total if total.present?
 
-    (entries_total + last_month_value).tap do |result|
-      self.total = result
-      self.save!
-    end
+    self.update(total_cents: entries_total + last_month_value)
+
+    total
   end
 
-  def through(final_month)
-    Month.through(self, final_month)
+  def through(final_month, inclusive: false)
+    Month.through(self, final_month, inclusive:)
   end
 
   def next(number)
@@ -112,7 +101,7 @@ class Month < ApplicationRecord
   def last_month_value
     return 0 if last_month.nil?
 
-    last_month.calculate * (1.0 + (year.interest_rate || 0) / 12000)
+    last_month.calculate.cents * (1.0 + (year.interest_rate || 0) / 12000)
   end
 
   def last_month
@@ -149,7 +138,11 @@ class Month < ApplicationRecord
   end
 
   def <=>(other)
-    (year <=> other.year).nonzero? || name_before_type_cast <=> other.name_before_type_cast
+    (year <=> other.year).nonzero? || numeric_month <=> other.numeric_month
+  end
+
+  def numeric_month
+    self.class.names[name.to_s]
   end
 
   alias_method :succ, :next_month

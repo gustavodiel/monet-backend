@@ -8,3 +8,10 @@ development:
   host: <%= ENV.fetch('DATABASE_HOST', '172.20.0.2') %>
   username: <%= ENV['POSTGRES_USER'] %>
   password: <%= ENV['POSTGRES_PASSWORD'] %>
+
+test:
+  adapter: postgresql
+  database: monet_Test
+  host: <%= ENV.fetch('DATABASE_HOST', '172.20.0.2') %>
+  username: <%= ENV['POSTGRES_USER'] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>

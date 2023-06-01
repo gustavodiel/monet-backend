@@ -59,7 +59,7 @@ class Year < ApplicationRecord
 
   Month::NAMES.each do |month_name, value|
     define_method(month_name) do
-      months.find_by(name: value)
+      months.find(&"#{month_name}?".to_sym)
     end
   end
 end
