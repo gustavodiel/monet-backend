@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Month, type: :model do
+RSpec.describe Month do
   let!(:y2023) { create(:year, name: 2023) }
   let(:jan_23) { y2023.months.find(&:january?) }
   let(:feb_23) { y2023.months.find(&:february?) }
@@ -17,7 +17,7 @@ RSpec.describe Month, type: :model do
       let(:expected_months) { y2023.months - [jan_23, dec_23] }
 
       it 'returns the months between the two months' do
-        expect(Month.through(jan_23, dec_23)).to match_array(expected_months)
+        expect(described_class.through(jan_23, dec_23)).to match_array(expected_months)
       end
     end
 
@@ -25,7 +25,7 @@ RSpec.describe Month, type: :model do
       let(:expected_months) { (y2023.months + y2024.months) - [jan_23, dec_24] }
 
       it 'returns the months between the two months' do
-        expect(Month.through(jan_23, dec_24)).to match_array(expected_months)
+        expect(described_class.through(jan_23, dec_24)).to match_array(expected_months)
       end
     end
 
@@ -34,7 +34,7 @@ RSpec.describe Month, type: :model do
         let(:expected_months) { y2023.months }
 
         it 'returns the months between the two months' do
-          expect(Month.through(jan_23, dec_23, inclusive: true)).to match_array(expected_months)
+          expect(described_class.through(jan_23, dec_23, inclusive: true)).to match_array(expected_months)
         end
       end
 
@@ -42,7 +42,7 @@ RSpec.describe Month, type: :model do
         let(:expected_months) { (y2023.months + y2024.months) }
 
         it 'returns the months between the two months' do
-          expect(Month.through(jan_23, dec_24, inclusive: true)).to match_array(expected_months)
+          expect(described_class.through(jan_23, dec_24, inclusive: true)).to match_array(expected_months)
         end
       end
     end
@@ -51,7 +51,7 @@ RSpec.describe Month, type: :model do
   describe '.next' do
     context 'when current month is january' do
       it 'returns february' do
-        expect(Month.next(jan_23, 1)).to eq([feb_23])
+        expect(described_class.next(jan_23, 1)).to eq([feb_23])
       end
 
       context 'when count is 4' do
@@ -60,7 +60,7 @@ RSpec.describe Month, type: :model do
         let(:may) { y2023.months.find(&:may?) }
 
         it 'returns the next 4 months' do
-          expect(Month.next(jan_23, 4)).to eq([feb_23, march, april, may])
+          expect(described_class.next(jan_23, 4)).to eq([feb_23, march, april, may])
         end
       end
     end
@@ -69,7 +69,7 @@ RSpec.describe Month, type: :model do
       let(:feb_24) { y2024.months.find(&:february?) }
 
       it 'returns the next two months' do
-        expect(Month.next(dec_23, 2)).to eq([jan_24, feb_24])
+        expect(described_class.next(dec_23, 2)).to eq([jan_24, feb_24])
       end
     end
   end
@@ -84,7 +84,7 @@ RSpec.describe Month, type: :model do
       jan_23.invalidate!
 
       y2023.months.each do |m|
-        expect(m.reload.total_cents).to eq(nil)
+        expect(m.reload.total_cents).to be_nil
       end
     end
   end

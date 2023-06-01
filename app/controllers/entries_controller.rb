@@ -64,19 +64,25 @@ class EntriesController < ApplicationController
 
   def params_entry = params.require(:entry)
 
-  def entry_params = params_entry.permit(
-    %i[name description kind value_cents value_currency payment_method category
-       origin installment_total paid_at day_of_month_to_pay]
-  )
+  def entry_params
+    params_entry.permit(
+      %i[name description kind value_cents value_currency payment_method category
+         origin installment_total paid_at day_of_month_to_pay]
+    )
+  end
 
-  def monthly_params = params_entry.permit(
-    %i[name description kind value_cents value_currency payment_method category
-       origin paid_at day_of_month_to_pay]
-  )
+  def monthly_params
+    params_entry.permit(
+      %i[name description kind value_cents value_currency payment_method category
+         origin paid_at day_of_month_to_pay]
+    )
+  end
 
-  def monthly_month_params = params_entry.permit(
-    %i[start_month start_month_id end_month end_month_id]
-  )
+  def monthly_month_params
+    params_entry.permit(
+      %i[start_month start_month_id end_month end_month_id]
+    )
+  end
 
   def month_entry_params = params_entry.permit(:month_id, :month, :year, :year_id)
 

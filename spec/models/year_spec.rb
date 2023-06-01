@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Year, type: :model do
+RSpec.describe Year do
   let!(:y2023) { create(:year, name: 2023) }
   let(:jan_23) { y2023.months.find(&:january?) }
   let(:feb_23) { y2023.months.find(&:february?) }

@@ -24,7 +24,9 @@ jobs:
           POSTGRES_PASSWORD: password
     env:
       RAILS_ENV: test
-      DATABASE_HOST: "postgres://github:password@localhost:5432/monet_test"
+      POSTGRES_DB: monet_test
+      POSTGRES_USER: github
+      POSTGRES_PASSWORD: password
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

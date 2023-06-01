@@ -107,7 +107,7 @@ class Month < ApplicationRecord
   def last_month_value
     return 0 if last_month.nil?
 
-    last_month.calculate.cents * (1.0 + (year.interest_rate || 0) / 12_000)
+    last_month.calculate.cents * (1.0 + ((year.interest_rate || 0) / 12_000))
   end
 
   def last_month

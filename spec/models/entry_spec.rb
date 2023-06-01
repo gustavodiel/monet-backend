@@ -24,7 +24,7 @@ RSpec.describe Entry do
     before { entry }
 
     it 'creates the installments for the following months (2 + the current one)' do
-      expect { entry.apply_installments }.to change { Entry.count }.by(2)
+      expect { entry.apply_installments }.to change(described_class, :count).by(2)
       next_month = month.next_month
       expect(next_month.entries.count).to eq(1)
 
