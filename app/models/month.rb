@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Month < ApplicationRecord
   include Comparable
 
@@ -15,8 +17,8 @@ class Month < ApplicationRecord
     september: 9,
     october: 10,
     november: 11,
-    december: 12,
-  }
+    december: 12
+  }.freeze
 
   enum name: NAMES
 
@@ -26,8 +28,10 @@ class Month < ApplicationRecord
   monetize :total_cents, allow_nil: true
 
   has_many :entries, dependent: :destroy
-  has_many :start_periodic_entries, class_name: 'PeriodicEntry', foreign_key: :start_month_id, inverse_of: :start_month, dependent: :destroy
-  has_many :end_periodic_entries, class_name: 'PeriodicEntry', foreign_key: :end_month_id, inverse_of: :end_month, dependent: :nullify
+  has_many :start_periodic_entries, class_name: 'PeriodicEntry', foreign_key: :start_month_id,
+                                    inverse_of: :start_month, dependent: :destroy
+  has_many :end_periodic_entries, class_name: 'PeriodicEntry', foreign_key: :end_month_id, inverse_of: :end_month,
+                                  dependent: :nullify
 
   belongs_to :year
 
@@ -37,14 +41,15 @@ class Month < ApplicationRecord
     gt = inclusive ? '>=' : '>'
     lt = inclusive ? '<=' : '<'
 
-    Month.find_by_sql(<<-SQL.squish
-      SELECT  e.*
+    Month.find_by_sql(
+      <<-SQL.squish
+        SELECT  e.*
         FROM months e
         JOIN years ye ON e.year_id = ye.id
         WHERE month_index(e.name, ye.name) #{gt} month_index(#{starting_month.numeric_month}, #{starting_month.year.name})
           AND month_index(e.name, ye.name) #{lt} month_index(#{ending_month.numeric_month}, #{ending_month.year.name})
         ORDER BY ye.name, name;
-    SQL
+      SQL
     )
   end
 
@@ -52,14 +57,15 @@ class Month < ApplicationRecord
     return [] unless (end_month = starting_month.numeric_month)
     return [] unless (end_year = starting_month.year.name)
 
-    Month.find_by_sql(<<-SQL.squish
-      SELECT  e.*
-      FROM months e
-      JOIN years ye ON e.year_id = ye.id
-      WHERE month_index(e.name, ye.name) > month_index(#{end_month}, #{end_year})
-        AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year}) + #{number}
-      ORDER BY ye.name, name;
-    SQL
+    Month.find_by_sql(
+      <<-SQL.squish
+        SELECT  e.*
+        FROM months e
+        JOIN years ye ON e.year_id = ye.id
+        WHERE month_index(e.name, ye.name) > month_index(#{end_month}, #{end_year})
+          AND month_index(e.name, ye.name) <= month_index(#{end_month}, #{end_year}) + #{number}
+        ORDER BY ye.name, name;
+      SQL
     )
   end
 
@@ -81,7 +87,7 @@ class Month < ApplicationRecord
   def calculate
     return total if total.present?
 
-    self.update(total_cents: entries_total + last_month_value)
+    update(total_cents: entries_total + last_month_value)
 
     total
   end
@@ -101,7 +107,7 @@ class Month < ApplicationRecord
   def last_month_value
     return 0 if last_month.nil?
 
-    last_month.calculate.cents * (1.0 + (year.interest_rate || 0) / 12000)
+    last_month.calculate.cents * (1.0 + (year.interest_rate || 0) / 12_000)
   end
 
   def last_month
@@ -131,13 +137,13 @@ class Month < ApplicationRecord
   def check_periodics
     periodics = PeriodicEntry.unfinished
     periodics.map do |periodic|
-      if periodic.on_month?(self)
-        periodic.build_for_month(self).attributes.except('id', 'created_at', 'updated_at')
-      end
+      periodic.build_for_month(self).attributes.except('id', 'created_at', 'updated_at') if periodic.on_month?(self)
     end
   end
 
   def <=>(other)
+    return unless other.is_a?(Month)
+
     (year <=> other.year).nonzero? || numeric_month <=> other.numeric_month
   end
 
@@ -145,5 +151,5 @@ class Month < ApplicationRecord
     self.class.names[name.to_s]
   end
 
-  alias_method :succ, :next_month
+  alias succ next_month
 end

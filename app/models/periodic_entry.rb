@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PeriodicEntry < ApplicationRecord
   scope :unfinished, -> { where(fulfilled: false) }
 

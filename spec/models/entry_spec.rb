@@ -21,6 +21,8 @@ RSpec.describe Entry do
     let(:entry) { create(:entry, installment_total: 3) }
     let(:month) { entry.month }
 
+    before { entry }
+
     it 'creates the installments for the following months (2 + the current one)' do
       expect { entry.apply_installments }.to change { Entry.count }.by(2)
       next_month = month.next_month
@@ -38,13 +40,13 @@ RSpec.describe Entry do
       let(:entry) { create(:entry, :income, value: 100) }
 
       it 'returns the value' do
-        expect(entry.sum_value).to eq(Money.from_cents(10000, "BRL"))
+        expect(entry.sum_value).to eq(10_000)
       end
     end
 
     context 'when entry is expense' do
       it 'returns the value' do
-        expect(entry.sum_value).to eq(Money.from_cents(-10000, "BRL"))
+        expect(entry.sum_value).to eq(-10_000)
       end
     end
   end

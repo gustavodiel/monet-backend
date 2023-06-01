@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreatePeriodicEntries < ActiveRecord::Migration[7.0]
   def change
     create_table :periodic_entries do |t|

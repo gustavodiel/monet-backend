@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Entry < ApplicationRecord
   monetize :value_cents
 
@@ -24,6 +26,7 @@ class Entry < ApplicationRecord
 
   def sum_value
     return value.cents if income?
+
     -value.cents
   end
 end

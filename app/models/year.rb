@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Year < ApplicationRecord
   default_scope { includes(:months) }
 
@@ -8,23 +10,23 @@ class Year < ApplicationRecord
   has_many :months, dependent: :destroy
 
   def self.at(name)
-    Year.find_by(name: name)
+    Year.find_by(name:)
   end
 
   def self.at!(name)
-    Year.find_by!(name: name)
+    Year.find_by!(name:)
   rescue ActiveRecord::RecordNotFound
-    Year.create(name: name, interest_rate: 12.75)
+    Year.create(name:, interest_rate: 12.75)
   end
 
   def create_months
-    Month::NAMES.keys.each do |month_name|
-      self.months.build(name: month_name)
+    Month::NAMES.each_key do |month_name|
+      months.build(name: month_name)
     end
   end
 
   def months_after(month)
-    months.where('months.name > ?', month.name_before_type_cast).order(:name)
+    months.where('months.name > ?', month.numeric_month).order(:name)
   end
 
   def current_month
@@ -55,9 +57,9 @@ class Year < ApplicationRecord
     name <=> other.name
   end
 
-  alias_method :succ, :next_year
+  alias succ next_year
 
-  Month::NAMES.each do |month_name, value|
+  Month::NAMES.each do |month_name, _value|
     define_method(month_name) do
       months.find(&"#{month_name}?".to_sym)
     end

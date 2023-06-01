@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class EntriesController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -16,16 +18,23 @@ class EntriesController < ApplicationController
   end
 
   def create_monthly
-    raise 'Must have start_month parameter' if monthly_month_params[:start_month].nil? && monthly_month_params[:start_month_id].nil?
+    if monthly_month_params[:start_month].nil? && monthly_month_params[:start_month_id].nil?
+      raise 'Must have start_month parameter'
+    end
 
-    end_month = monthly_month_params[:end_month].present? || monthly_month_params[:end_month_id].present? ? month_for_entry(month: monthly_month_params[:end_month], month_id: monthly_month_params[:end_month_id]) : nil
-    start_month = month_for_entry(month: monthly_month_params[:start_month], month_id: monthly_month_params[:start_month_id])
+    end_month = if monthly_month_params[:end_month].present? || monthly_month_params[:end_month_id].present?
+                  month_for_entry(
+                    month: monthly_month_params[:end_month], month_id: monthly_month_params[:end_month_id]
+                  )
+                end
+    start_month = month_for_entry(month: monthly_month_params[:start_month],
+                                  month_id: monthly_month_params[:start_month_id])
 
     periodic_entry = PeriodicEntry.create!(
       entry_data: monthly_params,
       interval: :monthly,
       start_month_id: start_month.id,
-      end_month: end_month
+      end_month:
     )
 
     respond_to do |format|
@@ -38,7 +47,7 @@ class EntriesController < ApplicationController
   end
 
   def create
-    entry = Entry.create!(entry_params.merge(month: month_for_entry, installment_number: installment_number))
+    entry = Entry.create!(entry_params.merge(month: month_for_entry, installment_number:))
 
     entry.apply_installments if entry.installment_total.try(:positive?)
 
@@ -54,17 +63,21 @@ class EntriesController < ApplicationController
   private
 
   def params_entry = params.require(:entry)
+
   def entry_params = params_entry.permit(
     %i[name description kind value_cents value_currency payment_method category
-     origin installment_total paid_at day_of_month_to_pay]
+       origin installment_total paid_at day_of_month_to_pay]
   )
+
   def monthly_params = params_entry.permit(
     %i[name description kind value_cents value_currency payment_method category
-     origin paid_at day_of_month_to_pay]
+       origin paid_at day_of_month_to_pay]
   )
+
   def monthly_month_params = params_entry.permit(
     %i[start_month start_month_id end_month end_month_id]
   )
+
   def month_entry_params = params_entry.permit(:month_id, :month, :year, :year_id)
 
   def installment_number = entry_params[:installment_total].present? ? 1 : nil

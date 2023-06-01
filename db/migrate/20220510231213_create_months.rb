@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateMonths < ActiveRecord::Migration[7.0]
   def change
     create_table :months do |t|
@@ -6,6 +8,6 @@ class CreateMonths < ActiveRecord::Migration[7.0]
       t.belongs_to :year
     end
 
-    add_index :months, [:year_id, :name], unique: true
+    add_index :months, %i[year_id name], unique: true
   end
 end

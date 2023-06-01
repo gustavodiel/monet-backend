@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MonthsHelper
   def self.month_from_params(params)
     return Month.find(params[:month_id]) if params[:month_id].present?
